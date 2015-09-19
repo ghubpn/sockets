@@ -95,10 +95,17 @@ void HandleTCPClient(int clntSocket) {
       DieWithSystemMessage("recv() failed");
 
     //send more, editted by adam
+    printf("should run Adam's code");
     char* cmd = "\nCan you hear me now!";
     char inStr[256];
     strcpy(inStr, cmd);
-    send(clntSocket, inStr, strlen(inStr), 0);
+    ssize_t sentIt = send(clntSocket, inStr, strlen(inStr), 0);
+
+    if(sentIt < 0){
+      printf("hasn't been sent");
+    } else{
+      printf("may have been sent");
+    }
   }
 
   close(clntSocket); // Close client socket
