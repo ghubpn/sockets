@@ -93,6 +93,12 @@ void HandleTCPClient(int clntSocket) {
     numBytesRcvd = recv(clntSocket, buffer, BUFSIZE, 0);
     if (numBytesRcvd < 0)
       DieWithSystemMessage("recv() failed");
+
+    //send more, editted by adam
+    char* cmd = "\nCan you hear me now!";
+    char inStr[256];
+    strcpy(inStr, cmd);
+    send(clntSocket, inStr, strlen(inStr), 0);
   }
 
   close(clntSocket); // Close client socket
