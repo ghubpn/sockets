@@ -1,0 +1,15 @@
+git add .
+git commit -m "//comment"
+git config --global user.email "nhrivard@gmail.com"
+git config --global user.name "nicholopolis"
+git push
+
+git pull
+
+
+
+//to remove
+git rm
+
+// to clone
+git clone "url of repo"
