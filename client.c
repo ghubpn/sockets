@@ -15,7 +15,7 @@ struct sockaddr_in servaddr;
 memset( &servaddr, 0, sizeof(servaddr) );
 servaddr.sin_family = AF_INET;
 servaddr.sin_port = htons(8888);
-servaddr.sin_addr.s_addr = inet_addr("172.17.48.51");
+servaddr.sin_addr.s_addr = inet_addr("0.0.0.0");
 //printf("yomamma\n");
 
 // connect to server once accepted

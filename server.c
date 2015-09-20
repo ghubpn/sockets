@@ -53,17 +53,17 @@ printf("connection accepted\n");
 char buf[2000];
 int bytesRecv;
 
-while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0){
-
-	printf("in the while statement\n");
-	
-	printf("received a message of size %d\n", bytesRecv);
-	printf("%s\n", buf);
-	
-	send(clisock, buf, 2000, 0);
-	//strcpy(buf, "");
-	memset(buf, 0, sizeof(buf));
-
+while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
+  if( buf[0] == 'g' && buf[1] == 'e' && buf[2] == 't' ) {
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "_GET_COMMAND_\n");
+  }
+  else if( buf[0] == 'p' && buf[1] == 'u' && buf[2] == 't' ) {
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "_PUT_COMMAND_\n");
+  }
+  send(clisock, buf, 2000, 0);
+  memset(buf, 0, sizeof(buf));
 }
 
 // close socket, once finished
