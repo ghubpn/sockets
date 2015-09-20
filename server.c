@@ -3,6 +3,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <netinet/in.h>
 #include <signal.h>
 int main( int args, char *argv[] ) {
@@ -62,6 +64,23 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
     memset(buf, 0, sizeof(buf));
     strcpy(buf, "_PUT_COMMAND_\n");
   }
+  else if( buf[0] == 'm' && buf[1] == 'k' && buf[2] == 'd' &&
+	   buf[3] == 'i' && buf[4] == 'r') {
+    int start = 6;
+    int end = start;
+    while( buf[end] != '\0' ) {
+      ++end;
+    }
+    char dirName[end-start];
+    for( int i = 0; i < (end-start); ++i ) {
+      dirName[i] = buf[start+i];
+    }
+    for( int i = 0; i < (end-start); ++i ) {
+      printf("%c", dirName[i]);
+    }
+    printf("\n");
+  }
+  printf("%s\n",buf);
   send(clisock, buf, 2000, 0);
   memset(buf, 0, sizeof(buf));
 }
