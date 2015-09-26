@@ -5,10 +5,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
-//#include <sys/syscall.h>
 #include <sys/stat.h>
-//#include <fcntl.h>
-//#include <unistd.h>
+#include <fcntl.h>
+#include <dirent.h>
+
 int main( int args, char *argv[] ) {
 
 // create socket
@@ -61,8 +61,34 @@ int bytesRecv;
 while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
   
   if(buf[0] == '1'){
-    memset(buf, 0, sizeof(buf));
-    strcpy(buf, "_LIST_CONTENTS_\n");
+    char listBuf[2000]; //array to hold the list of the directory
+    //printf("in 1\n");
+    memset(buf, 0, sizeof(buf)); //resets the buf array
+    char *ptr = NULL; // to point to the current working directory
+    DIR *dPtr = NULL; // directory pointer to the path of the directory
+    struct dirent *strDir = NULL; //struct to read the contents of the directory
+    char test[200]; // to hold current working directory
+    getcwd(test, 200); //to get the current working directory
+    //printf("in directory %s\n", test);
+    //printf("passed the struct\n");
+    ptr = test; //to point ptr to the current working directory
+    //printf("passed ptr\n");
+    dPtr = opendir((const char*) ptr); //to open the directory and point the DIR variable to the directory
+    //printf("passed dPtr\n");
+    //printf("Right before the while\n");
+    while((strDir = readdir(dPtr)) != NULL){
+      //printf("In the while of 1\n");
+       strcpy(buf, strDir->d_name); //copy contents of directory in buf
+       strcat(buf, "  \t"); //to add a tab to the end of a content in the directory
+       strcat(listBuf, buf); //to concat the newly read content to the previously read content stored in listBuf
+       memset(buf, 0, sizeof(buf)); // to reset buf to ensure no duplication
+       //send(clisock, buf, 2000, 0);
+
+    }
+    //printf("%s\n", listBuf);
+    send(clisock, listBuf, 2000, 0);
+    memset(listBuf, 0, sizeof(listBuf));
+    //strcpy(buf, "_LIST_CONTENTS_\n");
   }
     else if( buf[0] == '2') {
     memset(buf, 0, sizeof(buf));
@@ -73,28 +99,27 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
     strcpy(buf, "_PUT_COMMAND_\n");
   }
   else if (buf[0] == '4'){
-  memset(buf, 0, sizeof(buf));
-  bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
-  int status;
-  status = chdir(buf);
-  if(status == 0){
-    printf("changes dir");
-  }
-  //strcpy(buf, "IN_CD_");
+    memset(buf, 0, sizeof(buf));
+    bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
+    int status; //check to ensure changing the dir was successful
+    status = chdir(buf);
+    if(status == 0){
+      printf("changes dir");
+    }
   }
   else if (buf[0] == '5'){
     //in the mkdir function
-  memset(buf, 0, sizeof(buf));
+  memset(buf, 0, sizeof(buf)); ///reset of buf
   //strcpy(buf, "IN_MKDIR_");
   bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
   int status;
-  status = mkdir(buf, ACCESSPERMS);
-  memset(buf, 0, sizeof(buf));
-  strcpy(buf, "Directory Made");
+  status = mkdir(buf, ACCESSPERMS); //make dir with name in buf and give permissions
+  memset(buf, 0, sizeof(buf)); //reset buf
+  strcpy(buf, "Directory Made"); //to provide feedback to client
   }
 
   send(clisock, buf, 2000, 0);
-  memset(buf, 0, sizeof(buf));
+  memset(buf, 0, sizeof(buf)); // to reset the buf
 }
 
 // close socket, once finished
