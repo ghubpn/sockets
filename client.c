@@ -76,11 +76,11 @@ while(1){
   printf("\n");
    //bytesSent = send( clisock, buf, strlen(buf), 0 );
   memset(buf, 0, sizeof(buf));
-  if(bytesSent < 0){
+  /*if(bytesSent < 0){
     printf("send failed");
     //return 1;
-  }
-  printf("sent message of size %d\n", bytesSent);
+  }*/
+  //printf("sent message of size %d\n", bytesSent);
 
   char buf2[6000];
 
