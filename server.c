@@ -5,6 +5,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
+//#include <sys/syscall.h>
+#include <sys/stat.h>
+//#include <fcntl.h>
+//#include <unistd.h>
 int main( int args, char *argv[] ) {
 
 // create socket
@@ -29,7 +33,7 @@ servaddr.sin_addr.s_addr = INADDR_ANY; // inet_addr( INADDR_ANY );
 
 // configure servsock using servaddr
 if(bind( servsock, (struct sockaddr *)&servaddr, sizeof(servaddr) ) < 0){
-	printf("bind failed");
+	printf("bind failed\n");
 	return 1;
 }
 
@@ -51,17 +55,46 @@ if(clisock < 0){
 printf("connection accepted\n");
 
 char buf[2000];
+//memset(buf, 0, sizeof(buf));
 int bytesRecv;
 
-while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0){
+while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
+  
+  if(buf[0] == '1'){
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "_LIST_CONTENTS_\n");
+  }
+    else if( buf[0] == '2') {
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "_GET_COMMAND_\n");
+  }
+  else if( buf[0] == '3') {
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "_PUT_COMMAND_\n");
+  }
+  else if (buf[0] == '4'){
+  memset(buf, 0, sizeof(buf));
+  bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
+  int status;
+  status = chdir(buf);
+  if(status == 0){
+    printf("changes dir");
+  }
+  //strcpy(buf, "IN_CD_");
+  }
+  else if (buf[0] == '5'){
+    //in the mkdir function
+  memset(buf, 0, sizeof(buf));
+  //strcpy(buf, "IN_MKDIR_");
+  bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
+  int status;
+  status = mkdir(buf, ACCESSPERMS);
+  memset(buf, 0, sizeof(buf));
+  strcpy(buf, "Directory Made");
+  }
 
-	printf("in the while statement\n");
-	
-	printf("received a message of size %d\n", bytesRecv);
-	printf("%s\n", buf);
-	
-	send(clisock, buf, strlen(buf), 0);
-
+  send(clisock, buf, 2000, 0);
+  memset(buf, 0, sizeof(buf));
 }
 
 // close socket, once finished
