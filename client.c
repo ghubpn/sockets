@@ -5,6 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
 int main( int args, char *argv[] ) {
 // create socket
 int clisock;
