@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <unistd.h>
 
 int main( int args, char *argv[] ) {
 
@@ -113,7 +114,7 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
   //strcpy(buf, "IN_MKDIR_");
   bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
   int status;
-  status = mkdir(buf, ACCESSPERMS); //make dir with name in buf and give permissions
+  status = mkdir(buf, S_IRWXU | S_IRWXG | S_IRWXO); //make dir with name in buf and give permissions
   memset(buf, 0, sizeof(buf)); //reset buf
   strcpy(buf, "Directory Made"); //to provide feedback to client
   }
