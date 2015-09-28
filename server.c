@@ -86,8 +86,6 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
     char  filename[200];
     memset(buf, 0, sizeof(buf));
     recv( clisock, filename, 2000, 0 );
-    //FILE* file;
-    //char fName[200];
     //fName[0] = '.';
     //fName[1] = '/'; //to look in current directory
     //strcat(fName, buf); //concat the current directory symbol to the file name
@@ -99,10 +97,8 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
       return 1;
     }
     memset(buf, 0, sizeof(buf));
-    fscanf(file, "%s", buf);
-    //printf("%s\n", buf);
+    fscanf(file, "%s", buf); // write buf into file
     send(clisock, buf, 2000, 0);
-    //printf("got here!!\n");
     memset(buf, 0, sizeof(buf)); // to reset the buf
     fclose(file); //close the file
     printf("closed file!\n");
