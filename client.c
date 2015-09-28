@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 
 int main( int args, char *argv[] ) {
+  printf("yup\n");
 // create socket
 int clisock;
 clisock = socket( AF_INET, SOCK_STREAM, 0 );
@@ -18,8 +19,8 @@ struct sockaddr_in servaddr;
 memset( &servaddr, 0, sizeof(servaddr) );
 servaddr.sin_family = AF_INET;
 servaddr.sin_port = htons(5432);
-servaddr.sin_addr.s_addr = inet_addr("172.17.63.49");
-//printf("yomamma\n");
+servaddr.sin_addr.s_addr = inet_addr("0.0.0.0");
+printf("yomamma\n");
 
 // connect to server once accepted
 if (connect( clisock, (struct sockaddr *)&servaddr, sizeof(servaddr) ) < 0){
@@ -50,11 +51,13 @@ while(1){
   ssize_t bytesSent;
   FILE *file;
 
+  // 1 - LIST CONTENTS OF CURRENT DIRECTORY *************************************
   if(buf[0] == '1'){
     bytesSent = send( clisock, buf, strlen(buf), 0 );
     printf("Listing.....\n");
-    
-  } 
+  }
+
+  // 2 - GET A FILE FROM SERVER *************************************************
   else if(buf[0] == '2'){
     bytesSent = send( clisock, buf, strlen(buf), 0 );
     memset(buf, 0, sizeof(buf));
@@ -72,33 +75,37 @@ while(1){
       return 1;
     }
     fprintf(file, "%s", readBuf);
-    //fwrite(readBuf, 1, sizeof(readBuf), file);
-    //printf("Reading Buffer: %s\n", readBuf);
     memset(readBuf, 0, sizeof(readBuf));
     fclose(file);
-    printf("yup\n");
   }
+
+  // 3 - SEND A FILE TO SERVER ****************************************************
   else if(buf[0] == '3'){
     bytesSent = send( clisock, buf, strlen(buf), 0 );
     printf("Please Enter File Name To Send\n");
-  } 
+  }
+
+  // 4 - CHANGE DIRECTORY *********************************************************
   else if(buf[0] == '4'){
     bytesSent = send( clisock, buf, strlen(buf), 0 );
     printf("Please Enter Directory Name\n");
     scanf("%s", dirName);
     bytesSent = send(clisock, dirName, strlen(dirName), 0);
-  } 
+  }
+
+  // 5 - CREATE DIRECTORY *********************************************************
   else if(buf[0] == '5'){
     bytesSent = send( clisock, buf, strlen(buf), 0 );
     printf("Please Enter new Directory Name\n");
     scanf("%s", dirName);
     bytesSent = send(clisock, dirName, strlen(dirName), 0);
-  } else{
+  }
+
+  else{
     printf("Not a corrent entry, please try again\n");
   }
-  //editted up to here by Adam
 
-  printf("\n");
+  printf("yuppers!\n");
    //bytesSent = send( clisock, buf, strlen(buf), 0 );
   memset(buf, 0, sizeof(buf));
   //printf("yup2\n");
@@ -107,7 +114,7 @@ while(1){
     //return 1;
   }*/
   //printf("sent message of size %d\n", bytesSent);
-
+  /*
   char buf2[6000];
   memset(buf2, 0, sizeof(buf2));
   if(recv(clisock, buf2, 6000, 0) < 0){
@@ -117,7 +124,7 @@ while(1){
   printf("server reply\n");
   printf("%s\n", buf2);
   memset(buf2, 0, sizeof(buf2));
-
+  */
 }
 
 // close socket, once finished
