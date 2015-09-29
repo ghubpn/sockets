@@ -18,7 +18,7 @@ int main( int args, char *argv[] ) {
   struct sockaddr_in servaddr;
   memset( &servaddr, 0, sizeof(servaddr) );
   servaddr.sin_family = AF_INET;
-  servaddr.sin_port = htons(5431);
+  servaddr.sin_port = htons(5432);
   servaddr.sin_addr.s_addr = inet_addr("0.0.0.0");
 
   // connect to server once accepted
@@ -80,11 +80,18 @@ int main( int args, char *argv[] ) {
       }
       send( clisock, name, strlen(name), 0 );
       memset(name, 0, sizeof(name));
-      if(recv(clisock, data, 6000, 0) < 0){
+      int* psz;
+      if(recv(clisock, (int*)psz, sizeof(int), 0) < 0){
+	printf("receive failed: size\n");
+	exit(1);
+      }
+      printf("%d\n", *psz);
+      if(recv(clisock, data, *psz, 0) < 0){
 	printf("receive failed\n");
 	exit(1);
       }
-      fprintf(file, "%s", data);
+      //fprintf(file, "%s", data);
+      fwrite(data, sizeof(data[0]), sizeof(data)/sizeof(data[0]), file);
       memset(data, 0, sizeof(data));
       fclose(file);
     }
@@ -100,7 +107,9 @@ int main( int args, char *argv[] ) {
 	exit(1);
       }
       send( clisock, name, strlen(name), 0 ); // send file name
-      fscanf(file, "%s", data); // write file into buf
+      //fscanf(file, "%s", data); // write file into buf
+      int s = sizeof(file);
+      fread(data, 1, s, file);
       send( clisock, data, strlen(data), 0 ); // send file contents
       memset(data, 0, sizeof(data));
       fclose(file); // close local file
