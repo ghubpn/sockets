@@ -25,7 +25,7 @@ printf("socket created\n");
 struct sockaddr_in servaddr;
 memset( &servaddr, 0, sizeof(servaddr) );
 servaddr.sin_family = AF_INET;
-servaddr.sin_port = htons(5432);
+servaddr.sin_port = htons(5431);
 servaddr.sin_addr.s_addr = INADDR_ANY;
 
 // configure servsock using servaddr
@@ -38,7 +38,7 @@ printf("bind completed\n");
 
 // make servsock listen for incoming client connections
 listen( servsock, 5 );
-printf("listenning....\n");
+printf("listening....\n");
 
 // accept client connection and log connection information
 struct sockaddr_in cliaddr;
@@ -51,14 +51,19 @@ if(clisock < 0){
 }
 printf("connection accepted\n");
 
-char buf[2000];
-int bytesRecv;
+char  buf[6000];
+int   bytesRecv;
+FILE* file;
+char  filename[200];
 
-while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
+while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
+
+  //memset(buf, 0, sizeof(buf)); //resets the buf array
+  //memset(filename, 0, sizeof(filename));
 
   // 1 - LIST CONTENTS OF CURRENT DIRECTORY *************************************
   if(buf[0] == '1'){
-    char listBuf[2000]; //array to hold the list of the directory
+    char listBuf[6000]; //array to hold the list of the directory
     memset(buf, 0, sizeof(buf)); //resets the buf array
     char *ptr = NULL; // to point to the current working directory
     DIR *dPtr = NULL; // directory pointer to the path of the directory
@@ -76,16 +81,15 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
     }
     strcpy(buf, listBuf);
     memset(listBuf, 0, sizeof(listBuf));
-    send(clisock, buf, 2000, 0);
+    printf("grr\n");
+    send(clisock, buf, strlen(buf), 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
   }
   
   // 2 - GET A FILE FROM SERVER *************************************************
   else if( buf[0] == '2') {
-    FILE* file;
-    char  filename[200];
     memset(buf, 0, sizeof(buf));
-    recv( clisock, filename, 2000, 0 );
+    recv( clisock, filename, 6000, 0 );
     //fName[0] = '.';
     //fName[1] = '/'; //to look in current directory
     //strcat(fName, buf); //concat the current directory symbol to the file name
@@ -97,8 +101,8 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
       return 1;
     }
     memset(buf, 0, sizeof(buf));
-    fscanf(file, "%s", buf); // write buf into file
-    send(clisock, buf, 2000, 0);
+    fscanf(file, "%s", buf); // write file into buf
+    send(clisock, buf, strlen(buf), 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
     fclose(file); //close the file
     printf("closed file!\n");
@@ -106,35 +110,48 @@ while( bytesRecv = recv( clisock, buf, 2000, 0 ) > 0) {
 
   // 3 - SEND A FILE TO SERVER ****************************************************
   else if( buf[0] == '3') {
-    memset(buf, 0, sizeof(buf));
-    strcpy(buf, "_PUT_COMMAND_\n");
-    send(clisock, buf, 2000, 0);
+    //send(clisock, buf, 6000, 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
+    if(recv(clisock, filename, 200, 0) < 0){
+	printf("receive failed\n");
+	exit(1);
+    }
+    file = fopen(filename, "w"); // make file with write option
+    if (file == NULL) {
+	printf("Could not open file.\n");
+	exit(1);
+    }
+    if(recv(clisock, buf, 6000, 0) < 0){
+	printf("receive failed\n");
+	exit(1);
+    }
+    fprintf(file, "%s", buf); // write data to file
+    fclose(file);
   }
   
   // 4 - CHANGE DIRECTORY *********************************************************
   else if (buf[0] == '4'){
     memset(buf, 0, sizeof(buf));
-    bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
+    bytesRecv = recv(clisock, buf, 6000, 0); //to receive directory name
     int status; //check to ensure changing the dir was successful
     status = chdir(buf); //change the directory
     if(status == 0){
       printf("changes dir");
     }
     strcpy(buf, "_DIR_CHANGED_\n");
-    send(clisock, buf, 2000, 0);
+    send(clisock, buf, strlen(buf), 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
   }
 
   // 5 - CREATE DIRECTORY *********************************************************
   else if (buf[0] == '5'){
     memset(buf, 0, sizeof(buf)); //reset of buf
-    bytesRecv = recv(clisock, buf, 2000, 0); //to receive directory name
+    bytesRecv = recv(clisock, buf, 6000, 0); //to receive directory name
     int status;
     status = mkdir(buf, S_IRWXU | S_IRWXG | S_IRWXO); //make dir with name in buf and give permissions
     memset(buf, 0, sizeof(buf)); //reset buf
     strcpy(buf, "Directory Made"); //to provide feedback to client
-    send(clisock, buf, 2000, 0);
+    send(clisock, buf, strlen(buf), 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
   }
 }
