@@ -18,7 +18,7 @@ int main( int args, char *argv[] ) {
   struct sockaddr_in servaddr;
   memset( &servaddr, 0, sizeof(servaddr) );
   servaddr.sin_family = AF_INET;
-  servaddr.sin_port = htons(5432);
+  servaddr.sin_port = htons(5431);
   servaddr.sin_addr.s_addr = inet_addr("0.0.0.0");
 
   // connect to server once accepted
@@ -84,12 +84,12 @@ int main( int args, char *argv[] ) {
 	printf("receive failed: size\n");
 	exit(1);
       }
+      printf("%c\n", buf[0]);
       printf("%d\n", (int)buf[0]);
       if(recv(clisock, data, (int)buf[0], 0) < 0){
 	printf("receive failed\n");
 	exit(1);
       }
-      memset(buf, 0, sizeof(buf));
       //fprintf(file, "%s", data);
       fwrite(data, 1, (int)buf[0], file);
       memset(data, 0, sizeof(data));

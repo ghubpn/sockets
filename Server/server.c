@@ -25,7 +25,7 @@ printf("socket created\n");
 struct sockaddr_in servaddr;
 memset( &servaddr, 0, sizeof(servaddr) );
 servaddr.sin_family = AF_INET;
-servaddr.sin_port = htons(5432);
+servaddr.sin_port = htons(5431);
 servaddr.sin_addr.s_addr = INADDR_ANY;
 
 // configure servsock using servaddr
@@ -105,12 +105,9 @@ while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
     fseek(file, 0L, SEEK_END);
     int sz = ftell(file);
     fseek(file, 0L, SEEK_SET);
-    printf("%d\n", sz);
     fread(buf, sizeof(buf[0]), sz, file);
-    //printf("%s\n", buf);
-    //int tmp = htonl((uint32_t)sz);
-    //printf("%d\n", tmp);
-    send(clisock, (char*)sz, sizeof(int), 0);
+    printf("%d\n", sz);
+    send(clisock, (char*)sz, sizeof(char), 0);
     send(clisock, buf, sz, 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
     fclose(file); //close the file
