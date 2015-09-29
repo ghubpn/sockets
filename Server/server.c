@@ -105,9 +105,11 @@ while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
     fseek(file, 0L, SEEK_END);
     int sz = ftell(file);
     fseek(file, 0L, SEEK_SET);
+    filename[0] = (char)sz;
+    filename[1] = '\0';
     fread(buf, sizeof(buf[0]), sz, file);
     printf("%d\n", sz);
-    send(clisock, (char*)sz, sizeof(char), 0);
+    send(clisock, filename, strlen(filename), 0);
     send(clisock, buf, sz, 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
     fclose(file); //close the file
