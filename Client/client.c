@@ -73,25 +73,25 @@ int main( int args, char *argv[] ) {
       memset(buf, 0, sizeof(buf));
       printf("Please Enter File Name To Receive\n");
       scanf("%s", name);
-      file = fopen(name, "w");
+      file = fopen(name, "wb");
       if (file == NULL) {
 	printf("Could not open file.\n");
 	exit(1);
       }
       send( clisock, name, strlen(name), 0 );
       memset(name, 0, sizeof(name));
-      int* psz;
-      if(recv(clisock, (int*)psz, sizeof(int), 0) < 0){
+      if(recv(clisock, buf, sizeof(char), 0) < 0){
 	printf("receive failed: size\n");
 	exit(1);
       }
-      printf("%d\n", *psz);
-      if(recv(clisock, data, *psz, 0) < 0){
+      printf("%d\n", (int)buf[0]);
+      if(recv(clisock, data, (int)buf[0], 0) < 0){
 	printf("receive failed\n");
 	exit(1);
       }
+      memset(buf, 0, sizeof(buf));
       //fprintf(file, "%s", data);
-      fwrite(data, sizeof(data[0]), sizeof(data)/sizeof(data[0]), file);
+      fwrite(data, 1, (int)buf[0], file);
       memset(data, 0, sizeof(data));
       fclose(file);
     }
@@ -101,7 +101,7 @@ int main( int args, char *argv[] ) {
       memset(buf, 0, sizeof(buf));
       printf("Please Enter File Name To Send\n");
       scanf("%s", name);
-      file = fopen(name, "r");
+      file = fopen(name, "rb");
       if (file == NULL) {
 	printf("Could not open file.\n");
 	exit(1);

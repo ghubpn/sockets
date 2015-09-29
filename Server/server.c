@@ -81,7 +81,6 @@ while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
     }
     strcpy(buf, listBuf);
     memset(listBuf, 0, sizeof(listBuf));
-    printf("grr\n");
     send(clisock, buf, strlen(buf), 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
   }
@@ -93,7 +92,7 @@ while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
     //fName[0] = '.';
     //fName[1] = '/'; //to look in current directory
     //strcat(fName, buf); //concat the current directory symbol to the file name
-    file = fopen(filename, "r"); //open the file name for reading
+    file = fopen(filename, "rb"); //open the file name for reading
     printf("file name is %s\n", filename);
     memset(filename, 0, sizeof(filename));
     if(file == NULL){
@@ -108,6 +107,10 @@ while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
     fseek(file, 0L, SEEK_SET);
     printf("%d\n", sz);
     fread(buf, sizeof(buf[0]), sz, file);
+    //printf("%s\n", buf);
+    //int tmp = htonl((uint32_t)sz);
+    //printf("%d\n", tmp);
+    send(clisock, (char*)sz, sizeof(int), 0);
     send(clisock, buf, sz, 0);
     memset(buf, 0, sizeof(buf)); // to reset the buf
     fclose(file); //close the file
@@ -122,7 +125,7 @@ while( bytesRecv = recv( clisock, buf, 6000, 0 ) > 0) {
 	printf("receive failed\n");
 	exit(1);
     }
-    file = fopen(filename, "w"); // make file with write option
+    file = fopen(filename, "wb"); // make file with write option
     if (file == NULL) {
 	printf("Could not open file.\n");
 	exit(1);
