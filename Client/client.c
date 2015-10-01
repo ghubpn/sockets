@@ -50,6 +50,7 @@ int main( int args, char *argv[] ) {
     printf("[3] --- Send a file to the server\n"); //implements put file-name
     printf("[4] --- Change Directory\n"); //implements cd
     printf("[5] --- Make a new directory\n"); //implements mkdir directory-name
+    printf("[6] --- To Exit\n");
     printf("Selection: ");
 
     // get user's selection and send it to server
@@ -73,27 +74,38 @@ int main( int args, char *argv[] ) {
       memset(buf, 0, sizeof(buf));
       printf("Please Enter File Name To Receive\n");
       scanf("%s", name);
-      file = fopen(name, "wb");
-      if (file == NULL) {
-	printf("Could not open file.\n");
-	exit(1);
-      }
       send( clisock, name, strlen(name), 0 );
-      memset(name, 0, sizeof(name));
-      if(recv(clisock, buf, sizeof(char), 0) < 0){
-	printf("receive failed: size\n");
-	exit(1);
+      file = fopen(name, "ab");
+
+      if(NULL == file){
+        printf("Error opening file");
+        return 1;
       }
-      printf("%c\n", buf[0]);
-      printf("%d\n", (int)buf[0]);
-      if(recv(clisock, data, (int)buf[0], 0) < 0){
-	printf("receive failed\n");
-	exit(1);
+
+      int bytesReceived = 0;
+      char recvBuff[256];
+      
+      /* Receive data in chunks of 256 bytes */
+      while((bytesReceived = recv(clisock, recvBuff, 256, 0)) > 0){
+        printf("Bytes received %d\n",bytesReceived);    
+        // recvBuff[n] = 0;
+        fwrite(recvBuff, 1,bytesReceived,file);
+        printf("written\n");
+        memset(recvBuff, 0, sizeof(recvBuff));
+
+        if(bytesReceived < 256){
+          printf("in the nested if\n");
+          break;
+        }
+        // printf("%s \n", recvBuff);
+        //bytesReceived = 0;
       }
-      //fprintf(file, "%s", data);
-      fwrite(data, 1, (int)buf[0], file);
-      memset(data, 0, sizeof(data));
-      fclose(file);
+      printf("outside of the while!!!\n");
+
+      if(bytesReceived < 0){
+        printf("\n Read Error \n");
+      }
+      //fclose(file);
     }
 
     // 3 - SEND A FILE TO SERVER ****************************************************
@@ -144,6 +156,11 @@ int main( int args, char *argv[] ) {
       printf("server reply:\n\n");
       printf("%s\n\n", data);
     }
+
+    // 6 - Exit Program *********************************************************
+    else if(buf[0] == '6'){
+     break;
+    }    
 
     else{
       printf("Not a corrent entry, please try again\n");
